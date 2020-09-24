@@ -1,3 +1,4 @@
+
 static const char* ssid = "WIND_2.4G_E9E03F";
 static const char* password = "DYk9RCbdEZ";
 
@@ -14,7 +15,7 @@ static String img_path = "/pictures";
 
 
 // What day every month delete tha last files to get free space in memmory
-static String delete_scheduled_day = "15";
+static String delete_scheduled_day = "1";
 
 
 

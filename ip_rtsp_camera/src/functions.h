@@ -6,8 +6,7 @@
 #include <WiFiClient.h>
 
 // Date Time
-#include <NTPClient.h>
-#include <WiFiUdp.h>
+#include "time.h"
 
 // CAM
 #include "cam/OV2640.h"

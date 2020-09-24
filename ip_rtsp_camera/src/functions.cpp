@@ -3,10 +3,6 @@
 
 
 
-// Date Time
-static WiFiUDP ntpUDP;
-static NTPClient timeClient(ntpUDP);
-
 // For Video Frames
 static OV2640 cam;
 
@@ -44,14 +40,14 @@ static IPAddress ip;
       uint8_t * frame = (uint8_t *) cam.getfb();
       // Servers response frames
       client.write(frame, _size);  // Return Cam Frames
-      Serial.println(response);                             /////
+      //Serial.println(response);                             /////
       server.sendContent("\r\n");
       if (!client.connected())
             break;
       // Recording
       if (rec == "true") {
-        //recording(&cam);
-        save_picture(&cam);
+        recording(&cam);
+        //save_picture(&cam);
       }
       // Reconnect wifi if needed
       reconnect_if_needed_Wifi();
@@ -209,10 +205,15 @@ void setup_cam() {
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
   config.pixel_format = PIXFORMAT_JPEG;
-  //config.frame_size = FRAMESIZE_SVGA;
-  config.frame_size = FRAMESIZE_SXGA;
-  config.jpeg_quality = 12; 
-  config.fb_count = 2;   
+  if( psramFound() ){
+    config.frame_size = FRAMESIZE_UXGA;
+    config.jpeg_quality = 10;
+    config.fb_count = 2;
+  } else {
+    config.frame_size = FRAMESIZE_SVGA;
+    config.jpeg_quality = 12;
+    config.fb_count = 1;
+  }
   #if defined(CAMERA_MODEL_ESP_EYE)
     pinMode(13, INPUT_PULLUP);
     pinMode(14, INPUT_PULLUP);
@@ -289,24 +290,22 @@ void _delay(int m) {
 
 // Return Date Time
 String get_date_time() {
-  // setup
-  timeClient.begin();
+  // daylightOffset_sec
   //GMT +1 = 3600 sec
   //GMT +2 = 7200 sec
-  //GMT +3 = 10800 sec
-  timeClient.setTimeOffset(10800);
-  // get
-  while(!timeClient.update()) {
-    timeClient.forceUpdate();
+  //GMT +3 = 10800 sec = greece
+  const char* ntpServer = "pool.ntp.org";
+  const long  gmtOffset_sec = 0;
+  const int   daylightOffset_sec = 10800;
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("Failed to obtain time");
+    return "";
   }
-  String formattedDate = timeClient.getFormattedDate();
-  // Extract date
-  int splitT = formattedDate.indexOf("T");
-  String _date = formattedDate.substring(0, splitT);
-  // Extract time
-  String _time = formattedDate.substring(splitT+1, formattedDate.length()-1);
-  _time.replace(":", "-");
-  return _date + "&" +  _time;
+  char data[100];
+  strftime(data, 100, "%d-%B-%Y&%Hh-%Mm", &timeinfo);
+  return String( data );  // 24-September-2020&18h-07m
 }
 
 
@@ -334,13 +333,15 @@ void save_picture(OV2640 * cam) {
   camera_fb_t * fb = cam->getThis();
   setup_SD();
   createDir(SD_MMC, folder_name->c_str());
-  String _data = get_date_time();
-  String _date = _data.substring(0, _data.indexOf("&"));
+  String date = get_date_time(); // 24-September-2020&18h-07m
+  // Create dir with name date and subdir with name time
+  String _date = date.substring(0, date.indexOf("&"));
   String folder_path = *folder_name + "/" + _date;
   char folder_char[ folder_path.length()+1 ];
   folder_path.toCharArray(folder_char, sizeof(folder_char));
   createDir(SD_MMC, folder_char);
-  String _time = _data.substring(_data.indexOf("&")+1, _data.length());
+  Serial.println( "Created: " + folder_path );
+  String _time = date.substring(date.indexOf("&")+1, date.length());
   String file = folder_path + "/" + _time + ".jpeg";
   char file_path[ file.length()+1 ];
   file.toCharArray(file_path, sizeof(file_path));
@@ -355,18 +356,19 @@ void save_picture(OV2640 * cam) {
 void delete_last_month() {
   setup_SD();
   // Find the last month date
-  String date = get_date_time();
-  String year = date.substring(0, 4);
-  String month = date.substring(5, 7);
-  String day = date.substring(8, 10);
-  int m = month.toInt();
-  m = m-1; // One month back
-  if (m <= 10) {
-    month = "0"+String(m);
+  String date = get_date_time(); // 24-September-2020&18h-07m
+  String day = date.substring(0, 2);
+  String month = date.substring(3, 12);
+  String year = date.substring(13, 17);
+  // Find one year back
+  int y = year.toInt();
+  y = y-1;
+  if (y <= 10) {
+    year = "0"+String(y);
   } else {    
-  month = String(m);
+  year = String(y);
   }
-  if (day == delete_scheduled_day) {
+  if (day == delete_scheduled_day) {  //  ../settings.h
     String last_month_folder_videos = video_path + "/" + year + "-" + month + "-" + day;
     String last_month_folder_images = img_path + "/" + year + "-" + month + "-" + day;
     removeDir(SD_MMC, last_month_folder_videos.c_str());
@@ -379,6 +381,8 @@ void delete_last_month() {
 
 // Recording the Video    doesn't works  !!!
 void recording(OV2640 * cam) {
+  // create an mp4 content and save the video frames
+  /*
   String * folder_name = &video_path;
   camera_fb_t * fb = cam->getThis();
   setup_SD();
@@ -394,4 +398,5 @@ void recording(OV2640 * cam) {
   char file_path[ file.length()+1 ];
   file.toCharArray(file_path, sizeof(file_path));
   appendFile(SD_MMC, file_path, fb);
+  */
 }
