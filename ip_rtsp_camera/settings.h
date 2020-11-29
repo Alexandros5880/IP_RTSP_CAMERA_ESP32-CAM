@@ -19,8 +19,6 @@ static String delete_scheduled_day = "1";
 
 
 
-
-
 /*               Select camera model                   */
 
 //#define CAMERA_MODEL_WROVER_KIT
@@ -35,5 +33,5 @@ static String delete_scheduled_day = "1";
 
 
 /*               Select type of server                 */
-#define ENABLE_WEBSERVER    // WEB SERVER
-//#define ENABLE_RTSPSERVER   // RTSP
+//#define ENABLE_WEBSERVER    // WEB SERVER
+#define ENABLE_RTSPSERVER   // RTSP

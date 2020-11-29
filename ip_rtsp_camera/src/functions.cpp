@@ -104,7 +104,7 @@ static IPAddress ip;
   
   // Get rstp stream
   void getRTSPstream() {  // Inside Loop Function
-    uint32_t msecPerFrame = micros_per_frame;
+    uint32_t msecPerFrame = 6;
     static uint32_t lastimage = micros();
   
     // If we have an active client connection, just service that until gone
@@ -147,7 +147,8 @@ static IPAddress ip;
 
 // Setup Wifi
 void setup_wifi() {
-  // WiFi Connect
+    // WiFi Connect
+    //WiFi.config(ip);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -166,6 +167,7 @@ void setup_wifi() {
 
 // Reconnect wifi if needed
 void reconnect_if_needed_Wifi() {
+  //WiFi.config(ip);
   if ( WiFi.status() != WL_CONNECTED ) {
     WiFi.begin(ssid, password); // Wifi Connect
     //WiFi.config(ip, gateway, subnet);
