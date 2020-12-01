@@ -112,11 +112,11 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
     while (j < CurRequestSize && (CurRequest[j] == ' ' || CurRequest[j] == '\t')) ++j; // skip over any additional white space
     for (; (int)j < (int)(CurRequestSize-8); ++j)
     {
-        if ((CurRequest[j]   == 'r' || CurRequest[j]   == 'R')   &&
+        if ((CurRequest[j]   == 'r' || CurRequest[j]   == 'R') &&
             (CurRequest[j+1] == 't' || CurRequest[j+1] == 'T') &&
             (CurRequest[j+2] == 's' || CurRequest[j+2] == 'S') &&
             (CurRequest[j+3] == 'p' || CurRequest[j+3] == 'P') &&
-            CurRequest[j+4] == ':' && CurRequest[j+5] == '/')
+            CurRequest[j+4]  == ':' && CurRequest[j+5] == '/')
         {
             j += 6;
             if (CurRequest[j] == '/')
@@ -136,7 +136,7 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
         }
     }
 
-    // Look for the URL suffix (before the following "RTSP/"):
+    // Look for the URL suffix (before the following "RTSP/"):   " Find the path from the URL "
     parseSucceeded = false;
     for (unsigned k = i+1; (int)k < (int)(CurRequestSize-5); ++k)
     {
@@ -241,24 +241,25 @@ void CRtspSession::Handle_RtspOPTION()
 
 void CRtspSession::Handle_RtspDESCRIBE()
 {
+    // StreamName = Suffix
+    String url_suffix = "mjpeg/1";  // RTSP
+    char StreamName[url_suffix.length()+1];
+    strcpy(StreamName, url_suffix.c_str());
+
     static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
     static char SDPBuf[1024];
     static char URLBuf[1024];
 
-    // check whether we know a stream with the URL which is requested
-    m_StreamID = -1;        // invalid URL
-    if ((strcmp(m_URLPreSuffix,"mjpeg") == 0) && (strcmp(m_URLSuffix,"1") == 0)) m_StreamID = 0; else
-    if ((strcmp(m_URLPreSuffix,"mjpeg") == 0) && (strcmp(m_URLSuffix,"2") == 0)) m_StreamID = 1;
-    if (m_StreamID == -1)
-    {   // Stream not available
-        snprintf(Response,sizeof(Response),
-                 "RTSP/1.0 404 Stream Not Found\r\nCSeq: %s\r\n%s\r\n",
-                 m_CSeq,
-                 DateHeader());
-
-        socketsend(m_RtspClient,Response,strlen(Response));
+    // Suffix != from url Suffix
+    if (strcmp(m_URLPreSuffix, url_suffix.c_str()) != 0)
+    {
+        snprintf(Response, sizeof(Response),
+            "RTSP/1.0 404 Stream Not Found\r\nCSeq: %s\r\n%s\r\n",
+            m_CSeq,
+            DateHeader());
+        socketsend(m_RtspClient, Response, strlen(Response));
         return;
-    };
+    }
 
     // simulate DESCRIBE server response
     static char OBuf[256];
@@ -266,7 +267,6 @@ void CRtspSession::Handle_RtspDESCRIBE()
     strcpy(OBuf,m_URLHostPort);
     ColonPtr = strstr(OBuf,":");
     if (ColonPtr != nullptr) ColonPtr[0] = 0x00;
-
     snprintf(SDPBuf,sizeof(SDPBuf),
              "v=0\r\n"
              "o=- %d 1 IN IP4 %s\r\n"
@@ -277,13 +277,8 @@ void CRtspSession::Handle_RtspDESCRIBE()
              "c=IN IP4 0.0.0.0\r\n",
              rand(),
              OBuf);
-    char StreamName[64];
-    switch (m_StreamID)
-    {
-    case 0: strcpy(StreamName,"mjpeg/1"); break;
-    case 1: strcpy(StreamName,"mjpeg/2"); break;
-    };
-    snprintf(URLBuf,sizeof(URLBuf),
+
+    snprintf(URLBuf,sizeof(URLBuf), // URLBuf = "rtsp://host:port/path"
              "rtsp://%s/%s",
              m_URLHostPort,
              StreamName);
@@ -299,7 +294,6 @@ void CRtspSession::Handle_RtspDESCRIBE()
              URLBuf,
              (int) strlen(SDPBuf),
              SDPBuf);
-
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
@@ -399,7 +393,6 @@ bool CRtspSession::handleRequests(uint32_t readTimeoutMs)
     }
     else  {
         // Timeout on read
-
         return false;
     }
 }

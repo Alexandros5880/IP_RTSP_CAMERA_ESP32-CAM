@@ -1,7 +1,7 @@
 // Other Functios / Tools
 #include "src/functions.h"
 
-
+//   rtsp://[username:password@]ip_address[:rtsp_port]/server_URL[[?param1=val1[?param2=val2]…[?paramN=valN]]
 
 // Help Variable for deleting the last files
 long delete_previusTime = 0, delete_wait=10800000; // wait == 3 hours

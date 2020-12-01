@@ -1,13 +1,15 @@
 #pragma once
 
 /*
-#ifndef wifikeys_h
-#include "../wifikeys.h"
+// Settings
+#if __has_include("../../settings.h")
+#include "../../settings.h"
 #endif
 */
 
 #include "CStreamer.h"
 #include "platglue.h"
+
 
 
 // supported command types
@@ -32,7 +34,7 @@ public:
     ~CRtspSession();
 
     RTSP_CMD_TYPES Handle_RtspRequest(char const * aRequest, unsigned aRequestSize);
-    int            GetStreamID();
+    int GetStreamID();
 
     /**
        Read from our socket, parsing commands as possible.

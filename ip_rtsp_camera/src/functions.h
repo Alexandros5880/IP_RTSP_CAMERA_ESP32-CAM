@@ -1,5 +1,8 @@
 #include <Arduino.h>
 
+// Settings
+#include "../settings.h"
+
 // WiFi
 #include <WiFi.h>
 #include <WebServer.h>
@@ -18,11 +21,6 @@
 
 // SD
 #include "sd/SD.h"
-
-// Settings
-#ifndef SETTINGS_H
-#include "../settings.h"
-#endif
 
 // Get the pins for this camera
 #include "../camera_pins.h"

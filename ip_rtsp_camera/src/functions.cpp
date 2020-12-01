@@ -255,7 +255,7 @@ void setupServer() {
         rtspServer.begin();
         Serial.print("Stream Link: rtsp://");
         Serial.print(ip);
-        Serial.println(":"+String(rtsp_port)+String(url_stream_end));
+        Serial.println( ":" + String(rtsp_port) + "/" + "mjpeg/1");
         Serial.println("");
     #endif
 }
