@@ -1,12 +1,13 @@
+//#pragma once  // Include this file only ones
 
 static const char* ssid = "WIND_2.4G_E9E03F";
 static const char* password = "DYk9RCbdEZ";
 
 
 static int server_port = 152;
-static int rtsp_port = 153;
 
-//static String url_suffix = "mjpeg/2";  // RTSP
+//static int rtsp_port = 153;
+//static String url_end = "mjpeg/2";  // RTSP
 
 //int record_fps = 45;
 static String video_path = "/videos";

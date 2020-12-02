@@ -41,6 +41,7 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
     Init();
     CurRequestSize = aRequestSize;
     memcpy(CurRequest,aRequest,aRequestSize);
+    //Serial.println("CurRequest: " + String(CurRequest));
 
     // check whether the request contains information about the RTP/RTCP UDP client ports (SETUP command)
     char * ClientPortPtr;
@@ -90,6 +91,7 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
         printf("failed to parse RTSP\n");
         return false;
     }
+    //Serial.println("CmdName: " + String(CmdName));
 
     printf("RTSP received %s\n", CmdName);
 
@@ -135,14 +137,15 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
             break;
         }
     }
+    //Serial.println("m_URLHostPort: " + String(m_URLHostPort));
 
     // Look for the URL suffix (before the following "RTSP/"):   " Find the path from the URL "
     parseSucceeded = false;
     for (unsigned k = i+1; (int)k < (int)(CurRequestSize-5); ++k)
     {
         if (CurRequest[k]   == 'R'   && CurRequest[k+1] == 'T'   &&
-            CurRequest[k+2] == 'S'   && CurRequest[k+3] == 'P'   &&
-            CurRequest[k+4] == '/')
+            CurRequest[k+2] == 'S'   && CurRequest[k+3] == 'P' &&
+            CurRequest[k+4] == '/' )
         {
             while (--k >= i && CurRequest[k] == ' ') {}
             unsigned k1 = k;
@@ -163,6 +166,8 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
         }
     }
     if (!parseSucceeded) return false;
+    //Serial.println("m_URLPreSuffix: " + String(m_URLPreSuffix));
+    //Serial.println("m_URLSuffix: " + String(m_URLSuffix));
 
     // Look for "CSeq:", skip whitespace, then read everything up to the next \r or \n as 'CSeq':
     parseSucceeded = false;
@@ -190,6 +195,7 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
         }
     }
     if (!parseSucceeded) return false;
+    //Serial.println("m_CSeq: " + String(m_CSeq));
 
     // Also: Look for "Content-Length:" (optional)
     for (j = i; (int)j < (int)(CurRequestSize-15); ++j)
@@ -209,6 +215,8 @@ bool CRtspSession::ParseRtspRequest(char const * aRequest, unsigned aRequestSize
             if (sscanf(&CurRequest[j], "%u", &num) == 1) m_ContentLength = num;
         }
     }
+    //Serial.println("m_ContentLength: " + String(m_ContentLength));
+
     return true;
 };
 
@@ -242,16 +250,17 @@ void CRtspSession::Handle_RtspOPTION()
 void CRtspSession::Handle_RtspDESCRIBE()
 {
     // StreamName = Suffix
-    String url_suffix = "mjpeg/1";  // RTSP
     char StreamName[url_suffix.length()+1];
     strcpy(StreamName, url_suffix.c_str());
+    String url_end = String(m_URLPreSuffix) + "/" + String(m_URLSuffix);
+    Serial.println("rtsp://" + String(m_URLHostPort) + "/" + url_end);
 
     static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
     static char SDPBuf[1024];
     static char URLBuf[1024];
 
     // Suffix != from url Suffix
-    if (strcmp(m_URLPreSuffix, url_suffix.c_str()) != 0)
+    if ( ! url_end.equals(url_suffix) )
     {
         snprintf(Response, sizeof(Response),
             "RTSP/1.0 404 Stream Not Found\r\nCSeq: %s\r\n%s\r\n",
@@ -294,6 +303,7 @@ void CRtspSession::Handle_RtspDESCRIBE()
              URLBuf,
              (int) strlen(SDPBuf),
              SDPBuf);
+    //Serial.println("StreamName: " + String(StreamName));
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
@@ -301,7 +311,6 @@ void CRtspSession::Handle_RtspSETUP()
 {
     static char Response[1024];
     static char Transport[255];
-
     // init RTP streamer transport type (UDP or TCP) and ports for UDP transport
     m_Streamer->InitTransport(m_ClientRTPPort,m_ClientRTCPPort,m_TcpTransport);
 
@@ -330,16 +339,15 @@ void CRtspSession::Handle_RtspSETUP()
 
 void CRtspSession::Handle_RtspPLAY()
 {
+    const char* rtp_info = ("RTP-Info: url=rtsp://127.0.0.1:8554/" + url_suffix + "/track1\r\n\r\n").c_str();
     static char Response[1024];
-    //String p_th = "RTP-Info: url=rtsp://127.0.0.1:8554" + String(url_stream_end) + "/track1\r\n\r\n";
     // simulate SETUP server response
     snprintf(Response,sizeof(Response),
              "RTSP/1.0 200 OK\r\nCSeq: %s\r\n"
              "%s\r\n"
              "Range: npt=0.000-\r\n"
              "Session: %i\r\n",
-             "RTP-Info: url=rtsp://127.0.0.1:8554/mjpeg/1/track1\r\n\r\n"//p_th.c_str(),
-             ,
+             rtp_info,
              m_CSeq,
              DateHeader(),
              m_RtspSessionID);

@@ -26,9 +26,10 @@
 #include "../camera_pins.h"
 
 
-
-
-
+// If RTSP Server
+#ifdef ENABLE_RTSPSERVER
+#include "../rtsp_settings.h"
+#endif
 
 
 /*
