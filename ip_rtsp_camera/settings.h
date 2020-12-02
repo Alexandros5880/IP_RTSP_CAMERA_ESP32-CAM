@@ -5,18 +5,11 @@ static const char* password = "DYk9RCbdEZ";
 
 
 static int server_port = 152;
+static String server_username = "alexandrosplatanios";
+static String server_password = "Platanios719791";
 
 
-
-//int record_fps = 45;
-static String video_path = "/videos";
-static String img_path = "/pictures";
-
-
-
-// What day every month delete tha last files to get free space in memmory
-static String delete_scheduled_day = "1";
-
+static String img_path = "/Images";
 
 
 /*               Select camera model                   */

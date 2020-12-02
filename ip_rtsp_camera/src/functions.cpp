@@ -22,35 +22,39 @@ static IPAddress ip;
   // Return Video Streem
   void handle_jpg_stream(void) {
     // Get the parametres
-    String rec = server.arg("rec");
-    WiFiClient client = server.client();
-    String response = "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
-    server.sendContent(response);
-    while (1) {
-      cam.run();
-      if ( ! client.connected() ) {
-          break;
-      }
-      response = "--frame\r\n";
-      response += "Content-Type: image/jpeg\r\n\r\n";
-      server.sendContent(response);
-      // Real Time size and buffer
-      int _size = cam.getSize();
-      uint8_t * frame = (uint8_t *) cam.getfb();
-      // Servers response frames
-      client.write(frame, _size);  // Return Cam Frames
-      //Serial.println(response);                             /////
-      server.sendContent("\r\n");
-      if (!client.connected())
-            break;
-      // Recording
-      if (rec == "true") {
-        recording(&cam);
-        //save_picture(&cam);
-      }
-      // Reconnect wifi if needed
-      reconnect_if_needed_Wifi();
+    String _username = server.arg("username");
+    String _password = server.arg("password");
+    if ( (server_username == _username) && (server_password == _password) )
+    {
+        String response = "HTTP/1.1 200 OK\r\n";
+        response += "Content-Type: multipart/x-mixed-replace; boundary=frame\r\n\r\n";
+        server.sendContent(response);
+        WiFiClient client = server.client();
+        while (1) {
+            cam.run();
+            if (!client.connected()) {
+                break;
+            }
+            response = "--frame\r\n";
+            response += "Content-Type: image/jpeg\r\n\r\n";
+            server.sendContent(response);
+            // Real Time size and buffer
+            int _size = cam.getSize();
+            uint8_t* frame = (uint8_t*)cam.getfb();
+            // Servers response frames
+            client.write(frame, _size);  // Return Cam Frames
+            //Serial.println(response);                             /////
+            server.sendContent("\r\n");
+            if (!client.connected())
+                break;
+            // Reconnect wifi if needed
+            reconnect_if_needed_Wifi();
+        }
+    }
+    else
+    {
+        String response = "HTTP/1.1 400 [ERROR]\r\n";
+        server.sendContent(response);
     }
   }
   
@@ -235,17 +239,19 @@ void setupServer() {
         server.on("/jpg", HTTP_GET, handle_jpg);
         server.onNotFound(handleNotFound);
         server.begin();
+        // Video Stream URL
         Serial.print("Video Stream:  http://");
         Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/stream")+"?rec=false");
+        Serial.println(":"+String(server_port)+String("/stream")+
+                                                        "?username=" + server_username +
+                                                        "&password=" + server_password);
         Serial.println("");
-        Serial.print("Picture:  http://");
+        // JBEG URL
+        Serial.print("Picture:       http://");
         Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/jpg"));
-        Serial.println("");
-        Serial.print("Recording:  http://");
-        Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/recorder")+"?rec=true");
+        Serial.println(":"+String(server_port)+String("/jpg")+
+                                                        "?username=" + server_username +
+                                                        "&password=" + server_password);
         Serial.println("");
     #endif
 
@@ -348,57 +354,4 @@ void save_picture(OV2640 * cam) {
   char file_path[ file.length()+1 ];
   file.toCharArray(file_path, sizeof(file_path));
   writeFile(SD_MMC, file_path, fb);
-}
-
-
-
-
-
-// Delete files lost month every fifhteen
-void delete_last_month() {
-  setup_SD();
-  // Find the last month date
-  String date = get_date_time(); // 24-September-2020&18h-07m
-  String day = date.substring(0, 2);
-  String month = date.substring(3, 12);
-  String year = date.substring(13, 17);
-  // Find one year back
-  int y = year.toInt();
-  y = y-1;
-  if (y <= 10) {
-    year = "0"+String(y);
-  } else {    
-  year = String(y);
-  }
-  if (day == delete_scheduled_day) {  //  ../settings.h
-    String last_month_folder_videos = video_path + "/" + year + "-" + month + "-" + day;
-    String last_month_folder_images = img_path + "/" + year + "-" + month + "-" + day;
-    removeDir(SD_MMC, last_month_folder_videos.c_str());
-    removeDir(SD_MMC, last_month_folder_images.c_str());
-  }
-}
-
-
-
-
-// Recording the Video    doesn't works  !!!
-void recording(OV2640 * cam) {
-  // create an mp4 content and save the video frames
-  /*
-  String * folder_name = &video_path;
-  camera_fb_t * fb = cam->getThis();
-  setup_SD();
-  createDir(SD_MMC, folder_name->c_str());
-  String _data = get_date_time();
-  String _date = _data.substring(0, _data.indexOf("&"));
-  String folder_path = *folder_name + "/" + _date;
-  char folder_char[ folder_path.length()+1 ];
-  folder_path.toCharArray(folder_char, sizeof(folder_char));
-  createDir(SD_MMC, folder_char);
-  String _time = _data.substring(_data.indexOf("&")+1, _data.length()-4);
-  String file = folder_path + "/" + _time + "0.mp4";
-  char file_path[ file.length()+1 ];
-  file.toCharArray(file_path, sizeof(file_path));
-  appendFile(SD_MMC, file_path, fb);
-  */
 }

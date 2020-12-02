@@ -28,12 +28,6 @@ void setup() {
 
 void loop() {
 
-  // Delete the last month files
-  if (millis() - delete_previusTime >= delete_wait) {
-    delete_previusTime = millis();
-    delete_last_month();
-  }
-
   // Reconnect wifi if needed
   reconnect_if_needed_Wifi();
 
