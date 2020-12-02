@@ -1,7 +1,7 @@
 # Setup:
 
-### - HTTP
-Go to settings.h and set:
+### HTTP
+Go to **settings.h** and set:
 
     static const char* ssid = "";
     static const char* password = "DYk9RCbdEZ";
@@ -35,8 +35,8 @@ Go to settings.h and set:
     /*               Select type of server                 */
     #define ENABLE_WEBSERVER    // WEB SERVER
 
-### - RTSP
-Go to settings.h and set:
+### RTSP
+Go to **settings.h** and set:
 
     static const char* ssid = "";
     static const char* password = "";
@@ -45,7 +45,7 @@ Make comment:
 
     #define ENABLE_WEBSERVER    // WEB SERVER
 
-Go to rtsp_settings.h and set: Setup:
+Go to **rtsp_settings.h** and set: Setup:
 
     static int rtsp_port = xxx;
     static String url_end = "mjpeg/2";  // RTSP
