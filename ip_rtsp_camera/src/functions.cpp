@@ -231,13 +231,13 @@ void setup_cam() {
 void setupServer() {
     #ifdef ENABLE_WEBSERVER
         Serial.println("\n\n\n\nWEB SERVER\n\n\n\n");
-        server.on("/", HTTP_GET, handle_jpg_stream);
+        server.on("/stream", HTTP_GET, handle_jpg_stream);
         server.on("/jpg", HTTP_GET, handle_jpg);
         server.onNotFound(handleNotFound);
         server.begin();
         Serial.print("Video Stream:  http://");
         Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/")+"?rec=false");
+        Serial.println(":"+String(server_port)+String("/stream")+"?rec=false");
         Serial.println("");
         Serial.print("Picture:  http://");
         Serial.print(ip);

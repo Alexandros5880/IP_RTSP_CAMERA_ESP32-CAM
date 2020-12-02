@@ -6,8 +6,7 @@ static const char* password = "DYk9RCbdEZ";
 
 static int server_port = 152;
 
-//static int rtsp_port = 153;
-//static String url_end = "mjpeg/2";  // RTSP
+
 
 //int record_fps = 45;
 static String video_path = "/videos";
@@ -34,5 +33,5 @@ static String delete_scheduled_day = "1";
 
 
 /*               Select type of server                 */
-//#define ENABLE_WEBSERVER    // WEB SERVER
-#define ENABLE_RTSPSERVER   // RTSP
+#define ENABLE_WEBSERVER    // WEB SERVER
+//#define ENABLE_RTSPSERVER   // RTSP

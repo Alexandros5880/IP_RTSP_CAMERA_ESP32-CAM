@@ -239,11 +239,9 @@ RTSP_CMD_TYPES CRtspSession::Handle_RtspRequest(char const * aRequest, unsigned 
 void CRtspSession::Handle_RtspOPTION()
 {
     static char Response[1024]; // Note: we assume single threaded, this large buf we keep off of the tiny stack
-
     snprintf(Response,sizeof(Response),
              "RTSP/1.0 200 OK\r\nCSeq: %s\r\n"
              "Public: DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE\r\n\r\n",m_CSeq);
-
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 
@@ -313,7 +311,6 @@ void CRtspSession::Handle_RtspSETUP()
     static char Transport[255];
     // init RTP streamer transport type (UDP or TCP) and ports for UDP transport
     m_Streamer->InitTransport(m_ClientRTPPort,m_ClientRTCPPort,m_TcpTransport);
-
     // simulate SETUP server response
     if (m_TcpTransport)
         snprintf(Transport,sizeof(Transport),"RTP/AVP/TCP;unicast;interleaved=0-1");
@@ -333,7 +330,6 @@ void CRtspSession::Handle_RtspSETUP()
              DateHeader(),
              Transport,
              m_RtspSessionID);
-
     socketsend(m_RtspClient,Response,strlen(Response));
 }
 

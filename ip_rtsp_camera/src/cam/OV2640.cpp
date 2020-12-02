@@ -106,7 +106,6 @@ void OV2640::run(void)
     if (fb)
         //return the frame buffer back to the driver for reuse
         esp_camera_fb_return(fb);
-
     fb = esp_camera_fb_get();
 }
 
@@ -155,7 +154,6 @@ uint8_t *OV2640::getfb(void)
     runIfNeeded();
     if (!fb)
         return NULL; // FIXME - this shouldn't be possible but apparently the new cam board returns null sometimes?
-
     return fb->buf;
 }
 
