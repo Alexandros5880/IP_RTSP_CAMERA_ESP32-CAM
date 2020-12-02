@@ -2,14 +2,14 @@ The video Streaming can takes photos like frames but make the video streaming sl
 You can take a photo but not with the streaming functionality.
 
 # Setup:
-	# // HTTP
+	- HTTP
 	Go to settings.h and set:
 	ssid = "";
 	password = "";
 	and next setup the ip setings
 	setup the server_port
 	define the right cam model
-	# // RTSP
+	- RTSP
 	Go to settings.h and set:
 	ssid = "";
 	password = "";
