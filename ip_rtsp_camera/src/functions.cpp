@@ -6,9 +6,6 @@
 // For Video Frames
 static OV2640 cam;
 
-// Variable to store the Ip
-static IPAddress ip;
-
 
 
 
@@ -150,9 +147,14 @@ static IPAddress ip;
 
 
 // Setup Wifi
-void setup_wifi() {
+  void setup_wifi() {
+      // Set your Gateway IP address
+    #ifdef IP
+        if (!WiFi.config(ip, gateway, subnet)) {
+            Serial.println("STA Failed to configure");
+        }
+    #endif
     // WiFi Connect
-    //WiFi.config(ip);
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -161,8 +163,16 @@ void setup_wifi() {
     }
     ip = WiFi.localIP();
     Serial.println(F("WiFi connected"));
+    Serial.println();
     Serial.print("AP MAC: ");
     Serial.println(WiFi.softAPmacAddress());
+    Serial.print("NETMASK: ");
+    Serial.println(WiFi.subnetMask());
+    Serial.print("GATEWAY: ");
+    Serial.println(WiFi.gatewayIP());
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.println();
 }
 
 
@@ -171,7 +181,13 @@ void setup_wifi() {
 
 // Reconnect wifi if needed
 void reconnect_if_needed_Wifi() {
-  //WiFi.config(ip);
+    // Set your Gateway IP address
+    #ifdef IP
+        if (!WiFi.config(ip, gateway, subnet)) {
+            Serial.println("STA Failed to configure");
+        }
+    #endif
+    // WiFi Connect
   if ( WiFi.status() != WL_CONNECTED ) {
     WiFi.begin(ssid, password); // Wifi Connect
     //WiFi.config(ip, gateway, subnet);
