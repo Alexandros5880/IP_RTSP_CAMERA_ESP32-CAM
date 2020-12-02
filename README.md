@@ -45,7 +45,7 @@ Make comment:
 
     #define ENABLE_WEBSERVER    // WEB SERVER
 
-Setup:
+Go to rtsp_settings.h and set: Setup:
 
     static int rtsp_port = xxx;
     static String url_end = "mjpeg/2";  // RTSP
