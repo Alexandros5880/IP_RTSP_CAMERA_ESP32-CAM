@@ -32,48 +32,28 @@
 #endif
 
 
-/*
-// Thread
-#include <Thread.h>
-
-// Example
-Thread web_server = Thread();
-web_server.onRun(handle_jpg_stream);
-if(web_server.shouldRun()) {
-  web_server.run();
-}
-*/
-
-
-
-
 
 
 
 /*          FUNCTIONS            */
-
-// Setup Wifi
-void setup_wifi();
-// Reconnect wifi if needed
-void reconnect_if_needed_Wifi();
-// Setup WEB SERVER
-void setupServer();
+// Setup WiFi
+void setupWIFI();
 // Setup Camera
 void setup_cam();
+// Setup WEB SERVER
+void setupServer();
 // Start Server Function
 void start_server();
+// Connect wifi and camera
+void _connect();
 // Real Time Delay
 void _delay(int m);
 // Return Date Time
 String get_date_time();
+// Create a bufer with the write frame rate
+//void get_frames_per_fps(OV2640 * _buffer, const int &fps);  //   Not Used !!!
 // Save a picture
 void save_picture(OV2640 * cam);
-// Recording the Video
-void recording(OV2640 * cam);  //  Doesn't Works !!!
-// Delete Files Last Month
-void delete_last_month();
-// Create a bufer with the write frame rate
-void get_frames_per_fps(OV2640 * _buffer, const int &fps);  //   Not Used !!!
 
 
 

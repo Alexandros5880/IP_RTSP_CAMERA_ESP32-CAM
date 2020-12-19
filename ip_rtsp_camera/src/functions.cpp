@@ -21,6 +21,7 @@ static OV2640 cam;
     // Get the parametres
     String _username = server.arg("username");
     String _password = server.arg("password");
+    //Serial.println("Server has a request:  username: " + _username + "  pass: " + _password);
     if ( (server_username == _username) && (server_password == _password) )
     {
         String response = "HTTP/1.1 200 OK\r\n";
@@ -44,8 +45,6 @@ static OV2640 cam;
             server.sendContent("\r\n");
             if (!client.connected())
                 break;
-            // Reconnect wifi if needed
-            reconnect_if_needed_Wifi();
         }
     }
     else
@@ -144,64 +143,34 @@ static OV2640 cam;
 
 
 
-
-
-// Setup Wifi
-  void setup_wifi() {
-      // Set your Gateway IP address
-    #ifdef IP
-        if (!WiFi.config(ip, gateway, subnet)) {
-            Serial.println("STA Failed to configure");
-        }
-    #endif
-    // WiFi Connect
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(F("."));
-    }
-    ip = WiFi.localIP();
-    Serial.println(F("WiFi connected"));
-    Serial.println();
-    Serial.print("AP MAC: ");
-    Serial.println(WiFi.softAPmacAddress());
-    Serial.print("NETMASK: ");
-    Serial.println(WiFi.subnetMask());
-    Serial.print("GATEWAY: ");
-    Serial.println(WiFi.gatewayIP());
-    Serial.print("IP: ");
-    Serial.println(WiFi.localIP());
-    Serial.println();
-}
-
-
-
-
-
-// Reconnect wifi if needed
-void reconnect_if_needed_Wifi() {
-    // Set your Gateway IP address
-    #ifdef IP
-        if (!WiFi.config(ip, gateway, subnet)) {
-            Serial.println("STA Failed to configure");
-        }
-    #endif
-    // WiFi Connect
-  if ( WiFi.status() != WL_CONNECTED ) {
-    WiFi.begin(ssid, password); // Wifi Connect
-    //WiFi.config(ip, gateway, subnet);
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(300);
-      Serial.print(".");
-    }
-    // Setup Web Server
-    setupServer();
+void setupWIFI() {
+  // Set your Gateway IP address
+  #ifdef IP
+      if (!WiFi.config(ip, gateway, subnet)) {
+          Serial.println("STA Failed to configure");
+      }
+  #endif
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password); // Wifi Connect
+  //WiFi.config(ip, gateway, subnet);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(300);
+    Serial.print(".");
   }
+  // Print url imfo
+  ip = WiFi.localIP();
+  Serial.println(F("WiFi connected"));
+  Serial.println();
+  Serial.print("AP MAC: ");
+  Serial.println(WiFi.softAPmacAddress());
+  Serial.print("NETMASK: ");
+  Serial.println(WiFi.subnetMask());
+  Serial.print("GATEWAY: ");
+  Serial.println(WiFi.gatewayIP());
+  Serial.print("IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.println();
 }
-
-
-
 
 
 // Setup Camera
@@ -251,26 +220,25 @@ void setup_cam() {
 void setupServer() {
     #ifdef ENABLE_WEBSERVER
         Serial.println("\n\n\n\nWEB SERVER\n\n\n\n");
-        server.on("/stream", HTTP_GET, handle_jpg_stream);
-        server.on("/jpg", HTTP_GET, handle_jpg);
+        server.on(url_end_s, HTTP_GET, handle_jpg_stream);
+        server.on(img_path, HTTP_GET, handle_jpg);
         server.onNotFound(handleNotFound);
         server.begin();
         // Video Stream URL
         Serial.print("Video Stream:  http://");
         Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/stream")+
+        Serial.println(":"+String(server_port)+url_end_s+
                                                         "?username=" + server_username +
                                                         "&password=" + server_password);
         Serial.println("");
         // JBEG URL
         Serial.print("Picture:       http://");
         Serial.print(ip);
-        Serial.println(":"+String(server_port)+String("/jpg")+
+        Serial.println(":"+String(server_port)+img_path+
                                                         "?username=" + server_username +
                                                         "&password=" + server_password);
         Serial.println("");
     #endif
-
     // RTSP
     #ifdef ENABLE_RTSPSERVER
         Serial.println("\n\n\n\nRTSP\n\n\n\n");
@@ -296,6 +264,26 @@ void start_server() {
   #ifdef ENABLE_RTSPSERVER
     getRTSPstream();
   #endif
+}
+
+
+
+
+
+
+// Reconnect wifi if needed
+void _connect() {
+    // WiFi Connect
+  if ( WiFi.status() != WL_CONNECTED ) {
+    // Setup WiFi
+    setupWIFI();
+    // Setup Camera
+    setup_cam();
+    // Setup Web Server
+    setupServer();
+  }
+  // Start Server
+  start_server();
 }
 
 
@@ -335,7 +323,7 @@ String get_date_time() {
 
 
 
-
+/*
 // Create a bufer with the write frame rate                  Not Used   !!!
 void get_frames_per_fps(OV2640 * _buffer, const int &fps) {
   // Xfps per second , Xhz,  X frame pes 1000 millis
@@ -346,7 +334,7 @@ void get_frames_per_fps(OV2640 * _buffer, const int &fps) {
     _delay(wait);
   }
 }
-
+*/
 
 
 

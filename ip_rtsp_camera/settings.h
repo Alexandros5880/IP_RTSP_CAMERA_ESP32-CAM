@@ -7,7 +7,7 @@ static const char* password = "DYk9RCbdEZ";
 // Variable to store the Ip
 #define IP
 #ifdef IP
-static IPAddress ip(192, 168, 1, 33);
+static IPAddress ip(192, 168, 1, 35);
 // Set your Gateway IP address
 static IPAddress gateway(192, 168, 1, 254); // Routers IP
 static IPAddress subnet(255, 255, 255, 0);
@@ -21,7 +21,8 @@ static String server_username = "alexandrosplatanios";
 static String server_password = "Platanios719791";
 
 
-static String img_path = "/Images";
+static String url_end_s = "/stream";
+static String img_path = "/Pic";
 
 
 /*               Select camera model                   */
