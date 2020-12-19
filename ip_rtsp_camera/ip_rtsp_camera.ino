@@ -3,8 +3,25 @@
 
 //   rtsp://[username:password@]ip_address[:rtsp_port]/server_URL[[?param1=val1[?param2=val2]…[?paramN=valN]]
 
-// Help Variable for deleting the last files
-long delete_previusTime = 0, delete_wait=10800000; // wait == 3 hours
+
+
+// Reconnect wifi if needed
+void _connect() {
+    // WiFi Connect
+  if ( WiFi.status() != WL_CONNECTED ) {
+    // Setup WiFi
+    setupWIFI();
+    // Setup Camera
+    setup_cam();
+    // Setup Web Server
+    setupServer();
+  }
+  // Start Server
+  start_server();
+}
+
+
+
 
 
 void setup() {

@@ -144,6 +144,7 @@ static OV2640 cam;
 
 
 void setupWIFI() {
+  Serial.println("Setup WiFi...");
   // Set your Gateway IP address
   #ifdef IP
       if (!WiFi.config(ip, gateway, subnet)) {
@@ -175,6 +176,7 @@ void setupWIFI() {
 
 // Setup Camera
 void setup_cam() {
+  Serial.println("Setup Camera...");
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -218,6 +220,7 @@ void setup_cam() {
 
 // Setup WEB SERVER
 void setupServer() {
+  Serial.println("Setup Server...");
     #ifdef ENABLE_WEBSERVER
         Serial.println("\n\n\n\nWEB SERVER\n\n\n\n");
         server.on(url_end_s, HTTP_GET, handle_jpg_stream);
@@ -265,27 +268,6 @@ void start_server() {
     getRTSPstream();
   #endif
 }
-
-
-
-
-
-
-// Reconnect wifi if needed
-void _connect() {
-    // WiFi Connect
-  if ( WiFi.status() != WL_CONNECTED ) {
-    // Setup WiFi
-    setupWIFI();
-    // Setup Camera
-    setup_cam();
-    // Setup Web Server
-    setupServer();
-  }
-  // Start Server
-  start_server();
-}
-
 
 
 

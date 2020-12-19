@@ -44,8 +44,6 @@ void setup_cam();
 void setupServer();
 // Start Server Function
 void start_server();
-// Connect wifi and camera
-void _connect();
 // Real Time Delay
 void _delay(int m);
 // Return Date Time
