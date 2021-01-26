@@ -2,6 +2,57 @@
 
 
 
+// Set web server port number to 80
+static AsyncWebServer serverh(80);
+
+// Start The Server
+void start_hostpot() {
+  // Remove the password parameter, if you want the AP (Access Point) to be open
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(ssid_h, password_h);
+  delay(100);
+  // Seting Fixed IP
+  WiFi.softAPConfig(Ip_h, Ip_h, NMask_h);
+  // Fixed IP
+  IPAddress IP_h = WiFi.softAPIP();
+  Serial.print("AP IP address: ");
+  Serial.println(IP_h);
+  // Send web page with input fields to client
+  serverh.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send_P(200, "text/html", MAIN_page);
+  });
+  // When Click Save Button
+  serverh.on("/save", HTTP_GET,[](AsyncWebServerRequest *request) {
+    int paramsNr = request->params();
+    String ssi_d = "";
+    String pas_s = "";
+    for ( int i = 0; i < paramsNr; i++ ) {
+    AsyncWebParameter* p = request->getParam(i);
+    if ( p->name() == "ssid" ) {
+      ssi_d = p->value();
+    }
+    if ( p->name() == "password" ) {
+      pas_s = p->value();
+    }
+    }
+    Serial.println("WRITING TO FILE SSID: " + ssi_d + "   pass: " + pas_s);
+    deleteFile(SD_MMC, "/ssid.txt");
+    deleteFile(SD_MMC, "/password.txt");
+    writeFile(SD_MMC, "/ssid.txt", ssi_d.c_str());
+    writeFile(SD_MMC, "/password.txt", pas_s.c_str());
+    // Restart ESP
+    ESP.restart();
+  });
+  // On Error
+  serverh.onNotFound([] (AsyncWebServerRequest *request) {
+    request->send(404, "text/plain", "Not found");
+  });
+  // Start
+  serverh.begin();
+}
+
+
+
 
 // For Video Frames
 static OV2640 cam;
@@ -21,7 +72,7 @@ static OV2640 cam;
     // Get the parametres
     String _username = server.arg("username");
     String _password = server.arg("password");
-    //Serial.println("Server has a request:  username: " + _username + "  pass: " + _password);
+    Serial.println("Server has a request:  username: " + _username + "  pass: " + _password);
     if ( (server_username == _username) && (server_password == _password) )
     {
         String response = "HTTP/1.1 200 OK\r\n";
@@ -53,7 +104,7 @@ static OV2640 cam;
         server.sendContent(response);
     }
   }
-  
+
   // Return A Picture
   void handle_jpg(void) {
       WiFiClient client = server.client();
@@ -74,7 +125,7 @@ static OV2640 cam;
       // Show to page on server
       client.write(frame, _size);  // Return Cam Frames
   }
-  
+
   // Error Page
   void handleNotFound() {
       String message = "Server is running!\n\n";
@@ -143,40 +194,44 @@ static OV2640 cam;
 
 
 
-void setupWIFI() {
-  Serial.println("Setup WiFi...");
+void setupWIFI(String ssid, String password) {
   // Set your Gateway IP address
   #ifdef IP
       if (!WiFi.config(ip, gateway, subnet)) {
           Serial.println("STA Failed to configure");
       }
   #endif
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password); // Wifi Connect
-  //WiFi.config(ip, gateway, subnet);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(300);
-    Serial.print(".");
+  if (WiFi.status() != WL_CONNECTED) {
+    WiFi.mode(WIFI_STA);
+    Serial.println("Reconnecting...   ssid: " + ssid + "  pass: " + password);
+    WiFi.begin(ssid.c_str(), password.c_str());
+    long start = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() < start+5000) {
+      delay(300);
+      Serial.print(".");
+    }
   }
-  // Print url imfo
-  ip = WiFi.localIP();
-  Serial.println(F("WiFi connected"));
-  Serial.println();
-  Serial.print("AP MAC: ");
-  Serial.println(WiFi.softAPmacAddress());
-  Serial.print("NETMASK: ");
-  Serial.println(WiFi.subnetMask());
-  Serial.print("GATEWAY: ");
-  Serial.println(WiFi.gatewayIP());
-  Serial.print("IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.println();
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println();
+    // Print url imfo
+    ip = WiFi.localIP();
+    Serial.println(F("WiFi connected"));
+    Serial.println();
+    Serial.print("AP MAC: ");
+    Serial.println(WiFi.softAPmacAddress());
+    Serial.print("NETMASK: ");
+    Serial.println(WiFi.subnetMask());
+    Serial.print("GATEWAY: ");
+    Serial.println(WiFi.gatewayIP());
+    Serial.print("IP: ");
+    Serial.println(WiFi.localIP());
+    Serial.println();
+  }
 }
 
 
 // Setup Camera
 void setup_cam() {
-  Serial.println("Setup Camera...");
   camera_config_t config;
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
@@ -220,9 +275,8 @@ void setup_cam() {
 
 // Setup WEB SERVER
 void setupServer() {
-  Serial.println("Setup Server...");
     #ifdef ENABLE_WEBSERVER
-        Serial.println("\n\n\n\nWEB SERVER\n\n\n\n");
+        Serial.println("\n\nWEB SERVER\n\n");
         server.on(url_end_s, HTTP_GET, handle_jpg_stream);
         server.on(img_path, HTTP_GET, handle_jpg);
         server.onNotFound(handleNotFound);
@@ -339,5 +393,5 @@ void save_picture(OV2640 * cam) {
   String file = folder_path + "/" + _time + ".jpeg";
   char file_path[ file.length()+1 ];
   file.toCharArray(file_path, sizeof(file_path));
-  writeFile(SD_MMC, file_path, fb);
+  writeFilePic(SD_MMC, file_path, fb);
 }

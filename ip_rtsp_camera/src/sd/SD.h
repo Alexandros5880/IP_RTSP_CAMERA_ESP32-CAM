@@ -17,13 +17,13 @@ void createDir(fs::FS &fs, const char * path);
 void removeDir(fs::FS &fs, const char * path);
 
 // Read a file in SD card
-void readFile(fs::FS &fs, const char * path);
+String readFile(fs::FS &fs, const char * path);
 
 // Write a file in SD card
 void writeFile(fs::FS &fs, const char * path, const char * message);
 
 // Write a file in SD card
-void writeFile(fs::FS &fs, const char * path, camera_fb_t * fb);
+void writeFilePic(fs::FS &fs, const char * path, camera_fb_t * fb);
 
 // Append to the end of file in SD card
 void appendFile(fs::FS &fs, const char * path, const char * message);
@@ -32,7 +32,7 @@ void appendFile(fs::FS &fs, const char * path, const char * message);
 void appendFile(fs::FS &fs, const char * path, camera_fb_t * fb);
 
 // Rename a file in SD card
-void renameFile(fs::FS &fs, const char * path1, const char * path2);
+void renameFilePic(fs::FS &fs, const char * path1, const char * path2);
 
 // Delete a file in SD card
 void deleteFile(fs::FS &fs, const char * path);

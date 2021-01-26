@@ -33,11 +33,57 @@
 
 
 
+// HostPot
+#include "SPIFFS.h"
+#include "hotspot_lib/ESPAsyncWebServer.h"
+
+
+const char MAIN_page[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Controll Center</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <style>
+
+      </style>
+  </head>
+  <body>
+      <label for="ssid"><p style="font-size: 21px;">WIFI SSID:</p></label>
+      <input type="Text" style="font-size: 21px;" id="ssid" name="ssid" />
+      <br/><br/>
+      <label for="password"><p style="font-size: 21px;">Password:</p></label>
+      <input type="Text" style="font-size: 21px;" id="password" name="password" />
+      <br/><br/>
+      <br/>
+      <div>
+        <button id="save_button" style="font-size: 21px; border-radius: 15%;" name="save" onclick="SaveRequest()">Save</button>
+        <script>
+          function SaveRequest() {
+            let ssid = document.getElementById("ssid").value;
+            let password = document.getElementById("password").value;
+            var url = "/save?ssid="+ssid+"&password="+password; // http://192.168.1.1:80
+            var client = new XMLHttpRequest();
+            client.open("GET", url, true);
+            client.send(null); 
+          }
+        </script>
+      </div>
+      <br/><br/>
+      <br/>
+  </body>
+</html>
+)rawliteral";
+
 
 
 /*          FUNCTIONS            */
+// HostPot
+void start_hostpot();
 // Setup WiFi
-void setupWIFI();
+void setupWIFI(String ssid, String password);
 // Setup Camera
 void setup_cam();
 // Setup WEB SERVER

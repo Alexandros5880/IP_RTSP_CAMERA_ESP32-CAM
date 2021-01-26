@@ -81,19 +81,20 @@ void removeDir(fs::FS &fs, const char * path) {
 }
 
 // Read a file in SD card
-void readFile(fs::FS &fs, const char * path) {
+String readFile(fs::FS &fs, const char * path) {
     Serial.printf("Reading file: %s\n", path);
-
+    String data = "";
     File file = fs.open(path);
     if(!file){
         Serial.println("Failed to open file for reading");
-        return;
+        return "";
     }
 
     Serial.print("Read from file: ");
     while(file.available()){
-        Serial.write(file.read());
+        data += (char)file.read();
     }
+    return data;
 }
 
 // Write a file in SD card
@@ -114,7 +115,7 @@ void writeFile(fs::FS &fs, const char * path, const char * message) {
 }
 
 // Write a file in SD card
-void writeFile(fs::FS &fs, const char * path, camera_fb_t * fb) {
+void writeFilePic(fs::FS &fs, const char * path, camera_fb_t * fb) {
     Serial.printf("Writing file: %s\n", path);
 
     File file = fs.open(path, FILE_WRITE);
@@ -147,7 +148,7 @@ void appendFile(fs::FS &fs, const char * path, const char * message) {
 }
 
 // Append to the end of file in SD card
-void appendFile(fs::FS &fs, const char * path, camera_fb_t * fb) {
+void appendFilePic(fs::FS &fs, const char * path, camera_fb_t * fb) {
     Serial.printf("Appending to file: %s\n", path);
 
     File file = fs.open(path, FILE_APPEND);
