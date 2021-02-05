@@ -57,6 +57,12 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
       <label for="password"><p style="font-size: 21px;">Password:</p></label>
       <input type="Text" style="font-size: 21px;" id="password" name="password" />
       <br/><br/>
+      <label for="username"><p style="font-size: 21px;">Username:</p></label>
+      <input type="Text" style="font-size: 21px;" id="username" name="username" />
+      <br/><br/>
+      <label for="password_u"><p style="font-size: 21px;">Password:</p></label>
+      <input type="Text" style="font-size: 21px;" id="password_u" name="password_u" />
+      <br/><br/>
       <br/>
       <div>
         <button id="save_button" style="font-size: 21px; border-radius: 15%;" name="save" onclick="SaveRequest()">Save</button>
@@ -64,7 +70,9 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
           function SaveRequest() {
             let ssid = document.getElementById("ssid").value;
             let password = document.getElementById("password").value;
-            var url = "/save?ssid="+ssid+"&password="+password; // http://192.168.1.1:80
+            let username = document.getElementById("username").value;
+            let password_u = document.getElementById("password_u").value;
+            var url = "/save?ssid="+ssid+"&password="+password+"&username="+username+"&password_u="+password_u; // http://192.168.1.1:80
             var client = new XMLHttpRequest();
             client.open("GET", url, true);
             client.send(null); 
@@ -76,7 +84,6 @@ const char MAIN_page[] PROGMEM = R"rawliteral(
   </body>
 </html>
 )rawliteral";
-
 
 
 /*          FUNCTIONS            */

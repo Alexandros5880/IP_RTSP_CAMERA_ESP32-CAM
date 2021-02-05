@@ -34,6 +34,7 @@ static String server_password = "Platanios719791";
 
 static String url_end_s = "/stream";
 static String img_path = "/Pic";
+static String resete_path = "/resete";
 
 
 

@@ -26,6 +26,8 @@ void start_hostpot() {
     int paramsNr = request->params();
     String ssi_d = "";
     String pas_s = "";
+    String username = "";
+    String pas_u = "";
     for ( int i = 0; i < paramsNr; i++ ) {
     AsyncWebParameter* p = request->getParam(i);
     if ( p->name() == "ssid" ) {
@@ -34,12 +36,22 @@ void start_hostpot() {
     if ( p->name() == "password" ) {
       pas_s = p->value();
     }
+    if ( p->name() == "username" ) {
+      username = p->value();
+    }
+    if ( p->name() == "password_u" ) {
+      pas_u = p->value();
+    }
     }
     Serial.println("WRITING TO FILE SSID: " + ssi_d + "   pass: " + pas_s);
     deleteFile(SD_MMC, "/ssid.txt");
     deleteFile(SD_MMC, "/password.txt");
+    deleteFile(SD_MMC, "/username.txt");
+    deleteFile(SD_MMC, "/password_c.txt");
     writeFile(SD_MMC, "/ssid.txt", ssi_d.c_str());
     writeFile(SD_MMC, "/password.txt", pas_s.c_str());
+    writeFile(SD_MMC, "/username.txt", ssi_d.c_str());
+    writeFile(SD_MMC, "/password_u.txt", pas_s.c_str());
     // Restart ESP
     ESP.restart();
   });
@@ -124,6 +136,23 @@ static OV2640 cam;
       const uint8_t * frame = cam.getfb();
       // Show to page on server
       client.write(frame, _size);  // Return Cam Frames
+  }
+
+  // Resete Camera
+  void resete(void) {
+      // Get the parametres
+    String _username = server.arg("username");
+    String _password = server.arg("password");
+    Serial.println("Server has a request:  username: " + _username + "  pass: " + _password);
+    if ( (server_username == _username) && (server_password == _password) )
+    {
+      deleteFile(SD_MMC, "/ssid.txt");
+      deleteFile(SD_MMC, "/password.txt");
+      deleteFile(SD_MMC, "/username.txt");
+      deleteFile(SD_MMC, "/password_u.txt");
+      removeDir(SD_MMC, "/Pic");
+      ESP.restart();
+    }
   }
 
   // Error Page
@@ -279,6 +308,7 @@ void setupServer() {
         Serial.println("\n\nWEB SERVER\n\n");
         server.on(url_end_s, HTTP_GET, handle_jpg_stream);
         server.on(img_path, HTTP_GET, handle_jpg);
+        server.on(resete_path, HTTP_GET, resete);
         server.onNotFound(handleNotFound);
         server.begin();
         // Video Stream URL
@@ -292,6 +322,13 @@ void setupServer() {
         Serial.print("Picture:       http://");
         Serial.print(ip);
         Serial.println(":"+String(server_port)+img_path+
+                                                        "?username=" + server_username +
+                                                        "&password=" + server_password);
+
+                                                        // JBEG URL
+        Serial.print("Resete:       http://");
+        Serial.print(ip);
+        Serial.println(":"+String(server_port)+resete_path+
                                                         "?username=" + server_username +
                                                         "&password=" + server_password);
         Serial.println("");

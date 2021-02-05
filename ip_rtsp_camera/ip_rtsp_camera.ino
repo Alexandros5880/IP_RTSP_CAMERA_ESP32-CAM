@@ -11,9 +11,11 @@
 // Reconnect wifi if needed
 void _connect(int num, long delay_millis) {
   if (!hostpot_run) {
-    if (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) {
       String ssid = readFile(SD_MMC, "/ssid.txt");
       String password = readFile(SD_MMC, "/password.txt");
+      server_username = readFile(SD_MMC, "/username.txt");
+      server_password = readFile(SD_MMC, "/password_u.txt");
       setupWIFI(ssid, password);
       if (WiFi.status() == WL_CONNECTED) {
         setup_cam();
@@ -24,6 +26,7 @@ void _connect(int num, long delay_millis) {
       if(count_reconnections == num) {
         hostpot_run = true;
         count_reconnections = 0;
+        break;
       }
       delay(delay_millis);
     }
@@ -51,6 +54,14 @@ void setup() {
     while (!Serial);
     setup_SD();
     _connect(2,1000);
+    /*
+    deleteFile(SD_MMC, "/ssid.txt");
+    deleteFile(SD_MMC, "/password.txt");
+    deleteFile(SD_MMC, "/username.txt");
+    deleteFile(SD_MMC, "/password_u.txt");
+    removeDir(SD_MMC, "/Pic");
+    listDir(SD_MMC, "/", 2);
+    */
 }
 
 
